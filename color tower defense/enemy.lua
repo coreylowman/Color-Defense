@@ -1,14 +1,24 @@
+-- This file deals with all things enemy related: drawing, updating, death actions, etc
+
+-- enemy base table for functions
 ENEMY = {}
 
+-- enemy constructor
+-- level is the current level it is being added to
+-- path num is the id of the path it will follow
+-- the red, green, and blue are the health of the enemy
+-- the size is the number of times it will split if it dies
 function ENEMY:new(level,pathNum,red,green,blue,size)
 	local enemy = {}
 	setmetatable(enemy,{__index = self})
 	enemy.level = level
+	
 	local px,py = level.tiles:getPixelCoord(level.path[pathNum][1][1],level.path[pathNum][1][2])
 	enemy.position = {px + 1,py + 1}
 	enemy.position[1] = enemy.position[1] + 15 - size/2
 	enemy.position[2] = enemy.position[2] + 15 - size/2
-	enemy.velocity = {0,0}
+	
+	enemy.velocity = {0,0}	
 	enemy.color = {red,green,blue}
 	enemy.path = level:getPath(pathNum)
 	enemy.size = size
@@ -16,9 +26,11 @@ function ENEMY:new(level,pathNum,red,green,blue,size)
 	enemy.slowTimer = 0
 	enemy.slowAmount = 0
 	enemy:assignVelocity(enemy.speed)
+	
 	return enemy
 end
 
+-- enemy draw function
 function ENEMY:draw()
 	local ex,ey = self["position"][1],self["position"][2]
 	local r = self["color"][1] > 255 and 255 or self["color"][1]
@@ -30,6 +42,8 @@ function ENEMY:draw()
 	love.graphics.line(ex,ey,ex,ey + self["size"],ex + self["size"],ey + self["size"],ex + self["size"],ey,ex,ey)
 end
 
+
+-- enemy update function
 function ENEMY:update(dt)
 	if self.slowTimer > 0 then
 		self.slowTimer = self.slowTimer - dt
@@ -39,6 +53,8 @@ function ENEMY:update(dt)
 		self.slowAmount = 0
 		self.slowTimer = 0
 	end
+	
+	--checking if the path still have locations to go to in it
 	if #self["path"] ~= 0 then
 		local x,y,s = self.position[1],self.position[2],self.size
 		local mx,my = self["level"]["tiles"]:getTileCoord(x + s/2,y + s/2)
@@ -53,6 +69,10 @@ function ENEMY:update(dt)
 	end	
 end
 
+
+-- enemy slow function
+-- the amount to slow by
+-- the duration the slow will last
 function ENEMY:slow(amount,duration)
 	self.slowTimer = duration
 	if amount > self.slowAmount then
@@ -63,6 +83,8 @@ function ENEMY:slow(amount,duration)
 	self:assignVelocity(self.speed)
 end
 
+-- checking to see if the enemy is contained in one tile
+-- used when the size of the enemy is greater than 1 (when it is bigger than a tile) to check if it should change directions
 function ENEMY:inOneTile()
 	local x,y,s,ts = self.position[1],self.position[2],self.size,self.level.tiles.tileSize
 	if s < ts - 2 then
@@ -81,6 +103,8 @@ function ENEMY:inOneTile()
 	return ((mx == tx and my == ty) or (mx == bx and my == by)) and tx == bx and ty == by
 end
 
+
+-- called when the enemy splits or when it is first created
 function ENEMY:assignVelocity(speed)
 	if speed == nil then
 		speed = 30
@@ -96,14 +120,17 @@ function ENEMY:assignVelocity(speed)
 	end
 end
 
+-- returns a boolean value if the enemy is dead
 function ENEMY:isDead()
 	return self["color"][1] == 0 and self["color"][2] == 0 and self["color"][3] == 0
 end
 
+-- empty function for overriding
 function ENEMY:deathAction()
 
 end
 
+-- damage the enemy based on the color values passed in
 function ENEMY:damage(color)
 	if self["color"][1] ~= 0 then
 		self["color"][1] = self["color"][1]  - color[1] <= 0 and 0 or self["color"][1]  - color[1]
@@ -116,9 +143,11 @@ function ENEMY:damage(color)
 	end
 end
 
+--splitting enemy base table
 SPLITTING_ENEMY = {}
 setmetatable(SPLITTING_ENEMY,{__index = ENEMY})
 
+-- overriden death action... destroys the current enemy and adds the cert
 function SPLITTING_ENEMY:deathAction()
 	if self.splitTimes > 0 then
 		for i = 1, self.splitNumber do
@@ -131,6 +160,10 @@ function SPLITTING_ENEMY:deathAction()
 	end
 end
 
+
+-- splitting enemy constructor
+-- splitTimes is the number of times the enemy will split before it dies
+-- splitNumber is the number of enemies that will spawn when it dies
 function SPLITTING_ENEMY:new(level,pathnum,red,green,blue,size,splitTimes,splitNumber,x,y,path)
 	local enemy = ENEMY:new(level,pathnum,red,green,blue,size * (splitTimes + 1))
 	setmetatable(enemy,{__index = self})

@@ -1,5 +1,11 @@
 SPELL = {}
 
+--spell constructor
+-- level is the current level
+-- tx,ty is the tile coordinate
+-- life is the length the spell will last
+-- image is the spells image
+-- i is the type of spell (damage - red_function, slow - blue_function, money - green_function)
 function SPELL:new(level,tx,ty,life,image,i)
 	local spell = {}
 	setmetatable(spell,{__index = self})
@@ -23,6 +29,7 @@ function SPELL:new(level,tx,ty,life,image,i)
 	return spell
 end
 
+--damages and applies function to enemies within spells tile
 function SPELL:update(dt)
 	self.life = self.life - dt
 	for i = 1,#self.level.enemies do
@@ -40,6 +47,7 @@ function SPELL:update(dt)
 	end
 end
 
+--draws the spell crystal on its tile position
 function SPELL:draw()	
 	love.graphics.setShader(crystal_shader)
 	if self.func == 1 then
@@ -69,7 +77,6 @@ function SPELL:green_function(dt,enemy)
 		enemy.level.money = enemy.level.money + 2
 		self.enemies_hit[enemy] = true
 	end
-	io.write (#self.enemies_hit)
 end
 
 function SPELL:blue_function(dt,enemy)

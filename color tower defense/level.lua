@@ -1,5 +1,6 @@
 LEVEL = {}
 
+--level constructor
 function LEVEL:new(sx,sy,tileSize,numx,numy,file)
 	local level = {}
 	setmetatable(level,{__index = self})
@@ -24,6 +25,7 @@ function LEVEL:new(sx,sy,tileSize,numx,numy,file)
 end
 
 function LEVEL:update(dt)
+	--updating crystals/crystal holders
 	crystal_holders:update(dt)
 	if self.spellCooldown > 0 then
 		self.spellCooldown = self.spellCooldown - dt
@@ -32,6 +34,8 @@ function LEVEL:update(dt)
 		end
 		self.spellCooldown = self.spellCooldown < 0 and 0 or self.spellCooldown
 	end
+	
+	--updating particles
 	if self.particleTimer > 0 then
 		self.particleTimer = self.particleTimer - dt
 	end
@@ -41,6 +45,8 @@ function LEVEL:update(dt)
 			table.remove(self.particles,i)			
 		end
 	end
+	
+	--updating towers
 	local num = #self.particles
 	for i = 1,#self["towers"] do
 		self["towers"][i]:update(dt)
@@ -54,6 +60,8 @@ function LEVEL:update(dt)
 			table.remove(self["spells"],i)
 		end
 	end
+	
+	--updating/removing enemies
 	for i = #self["enemies"],1,-1 do
 		self["enemies"][i]:update(dt)
 		if #self["enemies"][i]["path"] == 0 then			
@@ -74,6 +82,8 @@ function LEVEL:update(dt)
 			table.remove(self["enemies"],i)
 		end
 	end
+	
+	--updating bodies of enemies
 	for i = #self["bodies"],1,-1 do
 		self["bodies"][i]:update(dt)
 		if self["bodies"][i]:finished() then
@@ -81,11 +91,15 @@ function LEVEL:update(dt)
 		end
 	end
 		
+	--updating health bar
 	self.health_bar:update(dt)	
+	
+	--not used at all?
 	for i = #self.enemiesToAdd,1,-1 do
 		table.insert(self.enemies,table.remove(self.enemiesToAdd,i))		
 	end
 	
+	--adding new enemies to level
 	for i = 1, #self["nextSpawn"] do			
 		if self["started"] then
 			self["nextSpawn"][i] = self["nextSpawn"][i] - dt
@@ -103,10 +117,13 @@ function LEVEL:update(dt)
 end
 
 function LEVEL:draw()
+	--drawing crystal holders
 	crystal_holders:draw()
+	
 	love.graphics.setLineWidth(5)
 	love.graphics.setColor(255,255,255,150)
 	local betweenPoints = false
+	--drawing lines between path points / intersections of these lines with spell crystals
 	for i = 1,#self.path do
 		for j = 1,#self.path[i] - 1 do
 			betweenPoints = false
@@ -134,6 +151,8 @@ function LEVEL:draw()
 	end
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.setLineWidth(1)
+	
+	--drawing path squares
 	for i = 1,#self["path"] do
 		for j = 1,#self["path"][i] do
 			local px,py = self["tiles"]:getPixelCoord(self["path"][i][j][1],self["path"][i][j][2])
@@ -149,18 +168,27 @@ function LEVEL:draw()
 		end
 	end
 
+	--drawing towers
 	for i = 1,#self["towers"] do
 		self["towers"][i]:draw()
 	end
+	
+	--drawing spells
 	for i = 1,#self["spells"] do
 		self["spells"][i]:draw()
 	end
+	
+	--drawing enemies
 	for i = 1,#self["enemies"] do
 		self["enemies"][i]:draw()
 	end
+	
+	--drawing particles
 	for i = 1,#self["particles"] do
 		self["particles"][i]:draw()
 	end
+	
+	--drawing bodies
 	for i = 1,#self["bodies"] do
 		self["bodies"][i]:draw()
 	end
@@ -171,6 +199,7 @@ function LEVEL:draw()
 	love.graphics.rectangle('line',414,616,15,15)
 	love.graphics.print(self.money,434,610)
 	
+	--drawing path direction indicators
 	if not self.started then
 		local bx,by,ex,ey = 0,0,0,0
 		local w,h = 0,0
@@ -210,6 +239,7 @@ function LEVEL:draw()
 	
 end
 
+--returns path with id num
 function LEVEL:getPath(num)
 	local path = {}
 	for i = 1, #self["path"][num] do
@@ -218,6 +248,7 @@ function LEVEL:getPath(num)
 	return path
 end
 
+--adds a tower to the level
 function LEVEL:addTower(tx,ty,color)
 	local added = false
 	--upgrade
@@ -238,6 +269,7 @@ function LEVEL:addTower(tx,ty,color)
 	return added
 end
 
+--sells/removes the tower at (tx,ty)
 function LEVEL:sellTower(tx,ty)
 	if self.tiles[tx][ty] ~= nil then
 		for i = #self.towers,1,-1 do
@@ -250,6 +282,7 @@ function LEVEL:sellTower(tx,ty)
 	end
 end
 
+--adds spell to (tx,ty)
 function LEVEL:addSpell(tx,ty,image,func)
 	if self:inPath(tx,ty) and self.spellCooldown <= 0 then		
 		table.insert(self.spells,SPELL:new(self,tx,ty,3.5,image,func))
@@ -258,6 +291,7 @@ function LEVEL:addSpell(tx,ty,image,func)
 	end
 end
 
+--returns true if (tx,ty) is contained in sum path
 function LEVEL:inPath(tx,ty)
 	local inPath = false
 	for num = 1, #self["path"] do
@@ -294,6 +328,7 @@ function LEVEL:enemyRemaining()
 	return count
 end
 
+--reads level in from files
 function LEVEL:load_level(file)
 	local contents,size = love.filesystem.read("levels/"..file,1000)
 	local count,lineNum = 0,0

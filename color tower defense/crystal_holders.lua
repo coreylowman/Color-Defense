@@ -1,12 +1,16 @@
+-- crystal holders are the spells that you can use (the are in the bottom right of the screen
+
 local crystal_holders = {}
 crystal_holders.image = love.graphics.newImage('images/crystal_holders.png')
 local w,h = crystal_holders.image:getWidth(),crystal_holders.image:getHeight()
 
+-- crystal movements
 crystal_holders.crystals = {}
 crystal_holders.crystals[1] = { [1] = 607, [2] = 575, [3] = love.graphics.newQuad(7,0,24,26,w,h), timer = .25, dir = 1, o_val = 0}
 crystal_holders.crystals[2] = { [1] = 657, [2] = 575, [3] = love.graphics.newQuad(45,0,24,26,w,h), timer = .5, dir = 1, o_val = 0 }
 crystal_holders.crystals[3] = { [1] = 707, [2] = 575, [3] = love.graphics.newQuad(83,0,24,26,w,h), timer = .75, dir = 1, o_val = 0 }
 
+-- crystal platform movements
 crystal_holders.platforms = {}
 crystal_holders.platforms[1] = { [1] = 600, [2] = 609, [3] = love.graphics.newQuad(0,27,38,18,w,h) }
 crystal_holders.platforms[2] = { [1] = 650, [2] = 609, [3] = love.graphics.newQuad(38,27,38,18,w,h) }
@@ -16,6 +20,7 @@ crystal_holders.platforms.direction = 1
 crystal_holders.platforms.old_val = 0
 crystal_holders.t = 0
 
+--draw function for the crystals and the platforms
 function crystal_holders:draw()
 	for i = 1,#self.crystals do
 		love.graphics.draw(self.image,self.crystals[i][3],self.crystals[i][1],self.crystals[i][2])
@@ -25,6 +30,8 @@ function crystal_holders:draw()
 	end
 end
 
+-- the update function for the crystals holder
+-- controls the direction of each platform/crystal
 function crystal_holders:update(dt)
 	if self.platforms.timer > 0 then
 		self.platforms.timer = self.platforms.timer - dt
@@ -60,6 +67,7 @@ function crystal_holders:update(dt)
 	end
 end
 
+-- animates the crystal
 function crystal_holders:animate_crystal(i)
 	local val = self.crystals[i].dir * self.crystals[i].timer
 	val = val * 5
@@ -67,12 +75,14 @@ function crystal_holders:animate_crystal(i)
 	self.crystals[i].o_val = val
 end
 
+--
 function crystal_holders:start_animation(_time)
 	self.platforms.timer = _time
 	self.platforms.old_val = 0
 	self.t = 0
 end
 
+-- moves the crystals and platforms up
 function crystal_holders:animate_up()
 	local val = -self.t
 	val = val * 32
@@ -85,6 +95,7 @@ function crystal_holders:animate_up()
 	self.platforms.old_val = val
 end
 
+-- moves the crystals and platforms down
 function crystal_holders:animate_down()
 	local val = self.t * self.t * self.t * self.t
 	val = val * 32

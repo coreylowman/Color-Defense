@@ -52,12 +52,15 @@ function love.load()
 	tower_to_place = nil
 end
 
+--updates level and handles win/lose behavior
 function love.update(dt)	
 	if location == playing then
 		crystal_timer = crystal_timer + dt
 		if crystal_timer > 360 then
 			crystal_timer = 0
 		end
+		
+		--update level / screenshake
 		local hp = level.health
 		level:update(dt)
 		if level.health ~= hp then
@@ -66,7 +69,10 @@ function love.update(dt)
 		if screenshake_timer > 0 then
 			screenshake_timer = screenshake_timer - dt
 		end
-		if level:noHealth() then
+		
+		--if dead, start level over or go to menu
+		--else if level is defeated, go to next level or back to menu
+		if level:noHealth() then 
 			if next_location == playing then
 				level = LEVEL:new(level_x,level_y,tileSize,tileSize,boardSize,curr_level_file)
 			end
@@ -106,6 +112,7 @@ function love.draw()
 			love.graphics.origin()
 		end
 		
+		--draws the colored circles around the towers
 		if lights then
 			love.graphics.setShader(light_shader)
 			love.graphics.setBlendMode('additive')
@@ -136,12 +143,16 @@ function love.draw()
 			light_shader:send("light_color",unpack(color))
 		end
 		
+		--draw grid
 		love.graphics.draw(grid_spriteBatch)
 		love.graphics.setShader()		
 		love.graphics.setBlendMode('alpha')
 
+		--draw level
 		crystal_shader:send("crystal_time",crystal_timer)
 		level:draw()
+		
+		--draw selected tower ui
 		if selected_tower ~= nil then
 			local px,py = selected_tower.position[1],selected_tower.position[2]
 			love.graphics.setColor(0,179,255,255)
@@ -235,6 +246,7 @@ function love.keypressed(key)
 	end
 end
 
+--adding spells and test enemies
 function love.keyreleased(key)
 	if location == playing then
 		if key == "1" then
@@ -280,6 +292,7 @@ function love.mousepressed(x,y,button)
 	end
 end
 
+--casting spells and upgrading towers
 function love.mousereleased(x,y,button)
 	if location == main_menu then
 	
@@ -288,7 +301,9 @@ function love.mousereleased(x,y,button)
 	elseif location == playing then	
 		local tx,ty = level["tiles"]:getTileCoord(x,y)
 		local clicked = false
+		
 		if selected_tower ~= nil then
+			--upgrade ui clicked
 			local c = {0,0,0,1}
 			local px,py = selected_tower.position[1],selected_tower.position[2]
 			if pt_in_rect(x,y,px - 5,py - 105,40,55) then
@@ -309,18 +324,23 @@ function love.mousereleased(x,y,button)
 				selected_tower = nil
 			end
 		end
+		
 		if not clicked then
+			--tower selection
 			if button == "l" and not level:inPath(tx,ty) and tx ~= -1 and ty ~= -1 and level["tiles"][tx][ty] ~= nil then
 				selected_tower = level["tiles"][tx][ty]
 			else
 				selected_tower = nil
 			end
 		end
+		
 		if button == "l" and tx ~= -1 and ty ~= -1 and tower_to_place ~= nil then
+			--tower added
 			if level:addTower(tx,ty,tower_to_place) then
 				tower_to_place = nil
 				selected_tower = level["tiles"][tx][ty]
 			end		
+		--tower bought
 		elseif button == "l" and pt_in_rect(x,y,44,567,60,60) then
 			tower_to_place = RED
 		elseif button == "l" and pt_in_rect(x,y,129,567,60,60) then

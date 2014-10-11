@@ -1,23 +1,6 @@
 TILES = {}
 
-function TILES:getTileCoord(px,py)
-	local x,y = px - self["sx"],py - self["sy"]
-	if 0 <= x and x <= self["numx"] * self["tileSize"] and 0 <= y and y <= self["numy"] * self["tileSize"] then
-		x = x == 0 and 1 or math.ceil(x / self["tileSize"])
-		y = y == 0 and 1 or math.ceil(y / self["tileSize"])
-		return x,y
-	end
-	return -1,-1
-end
-
-function TILES:getPixelCoord(tx,ty)
-	return self["sx"] + (tx - 1) * self["tileSize"],self["sy"] + (ty - 1) * self["tileSize"]
-end
-
-function TILES:validPosition(x,y)
-	return 0 < x and x <= self["numx"] and 0 < y and y <= self["numy"]
-end
-
+--tile constructor
 function TILES:new(sx,sy,tileSize,numx,numy)
 	local tiles = {}
 	setmetatable(tiles,{__index = self})
@@ -36,7 +19,32 @@ function TILES:new(sx,sy,tileSize,numx,numy)
 	return tiles
 end
 
+--converts a pixel coordinate to a tile coordinate, returns (-1,-1 if the pixel coordinate is not in the tiles)
+function TILES:getTileCoord(px,py)
+	local x,y = px - self["sx"],py - self["sy"]
+	if 0 <= x and x <= self["numx"] * self["tileSize"] and 0 <= y and y <= self["numy"] * self["tileSize"] then
+		x = x == 0 and 1 or math.ceil(x / self["tileSize"])
+		y = y == 0 and 1 or math.ceil(y / self["tileSize"])
+		return x,y
+	end
+	return -1,-1
+end
 
+--returns the pixel coordinate of the tile (top left)
+function TILES:getPixelCoord(tx,ty)
+	return self["sx"] + (tx - 1) * self["tileSize"],self["sy"] + (ty - 1) * self["tileSize"]
+end
+
+function TILES:validPosition(x,y)
+	return 0 < x and x <= self["numx"] and 0 < y and y <= self["numy"]
+end
+
+-- returns a new_grid
+-- style is dotted or full lines
+-- tileSize is the size of the individual boxes
+-- numx is the width of the grid
+-- numy is the height of the grid
+-- sx,sy is the pixel coordinate of the first box's top left coordinate
 function new_grid(style,tileSize,numx,numy,sx,sy)
 	local imageData = love.image.newImageData(tileSize,tileSize)
 	if style == 'dotted' then

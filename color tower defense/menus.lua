@@ -7,6 +7,7 @@ main_menu_items = { [1] = "Campaign", [2] = "Levels", [3] = "Controls", [4] = "Q
 controls_items = { [1] = "Left Mouse : Place/Interact Tower", [2] = "s : Start Level",
 [3] = "l : Activate Lighting", [4] = "escape : Exit Game", [5] = "backspace : Main Menu" }
 
+--draws the main menu, uses the static string tables above to show options
 function draw_main_menu()
 	local start_x,start_y = 345,175
 	for i = 1,#main_menu_items do
@@ -19,6 +20,7 @@ function draw_main_menu()
 	love.graphics.draw(red_image,start_x - 40,start_y + selected_menu_item * 50 - 3)
 end
 
+--draws the levels menu
 function draw_levels_menu()
 	local start_x,start_y = 345,175
 	for i = 1,#level_list do
@@ -31,6 +33,7 @@ function draw_levels_menu()
 	end
 end
 
+--draws the controls menu
 function draw_controls_menu()
 	local start_x,start_y = 100,100
 	for i = 1,#controls_items do

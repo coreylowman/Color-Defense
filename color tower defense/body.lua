@@ -1,5 +1,9 @@
+-- the body class is used when an enemy dies, and there body flies to the coin capture
 BODY = {}
 
+--body constructor
+--x,y is the position
+--ex,ey is the end position
 function BODY:new(x,y,ex,ey)
 	local body = {}
 	setmetatable(body,{__index = self})

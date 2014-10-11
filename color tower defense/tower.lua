@@ -1,5 +1,9 @@
 TOWER = {}
-
+--tower constructor
+--pixel_x,pixel_y is the pixel coordinates of the position. these are converted to tile coords
+--radius is the radius of attack
+--color is the type of damage the tower can deal
+--image is the towers image
 function TOWER:new(level,pixel_x,pixel_y,radius,color,image)
 	local tower = {}
 	setmetatable(tower,{__index = self})
@@ -15,6 +19,7 @@ function TOWER:new(level,pixel_x,pixel_y,radius,color,image)
 	return tower
 end
 
+--tower draw method, draws the towers image and lines to the enemies
 function TOWER:draw()
 	for i = 1,#self["targets"] do
 		love.graphics.setColor(255*self["color"][1],255*self["color"][2],255*self["color"][3],255)
@@ -26,8 +31,11 @@ function TOWER:draw()
 	love.graphics.draw(self["image"],self["position"][1],self["position"][2])
 end
 
+--tower update method, updates the targets, and damages the targets if they are in range
 function TOWER:update(dt)
 	local count = 0
+	
+	--removing targets from the target list, if they are dead, out of range, can't be damage, or if they are in the list more than once
 	for i = #self["targets"],1,-1 do
 		count = 0
 		for j = 1,#self["targets"] do
@@ -43,6 +51,7 @@ function TOWER:update(dt)
 		end
 	end
 	
+	-- adding targets to the target list
 	if #self["targets"] < self["max_targets"] then
 		local close_enemies = {}
 		local close_dist = {}
@@ -77,6 +86,7 @@ function TOWER:update(dt)
 		end
 	end
 	
+	--damaging the targets
 	for i = 1,#self["targets"] do
 		local color = {self["damage"][1]*dt*self["color"][1],self["damage"][2]*dt*self["color"][2],self["damage"][3]*dt*self["color"][3]}
 		self["targets"][i]:damage(color)
@@ -85,6 +95,7 @@ function TOWER:update(dt)
 		end
 	end
 	
+	-- NOT USED ANYMORE, experimental music stuff
 	if #self["targets"] > 0 then
 		if self["color"][1] == 1 and self["color"][2] == 0 and self["color"][3] == 0 then
 			sounds.play_Eb = true
@@ -108,6 +119,7 @@ function TOWER:update(dt)
 	end
 end
 
+--upgrade tower function, updates the damage the tower can deal and gets the new image
 function TOWER:upgrade(color)
 	if self["max_targets"] < 3 then
 		self["max_targets"] = self["max_targets"] + 1		
@@ -129,6 +141,7 @@ function TOWER:upgrade(color)
 	return false
 end
 
+--returns true if the tower can damage the enemy (if the towers color can possible reduce the enemies color)
 function TOWER:canDamageEnemy(enemy)
 	local can = false
 	if self["color"][1] ~= 0 and enemy["color"][1] ~= 0 then

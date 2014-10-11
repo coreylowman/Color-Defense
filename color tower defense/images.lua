@@ -7,6 +7,7 @@ tower_images[CYAN] = love.graphics.newImage('images/cyan_tower.png')
 tower_images[MAGENTA] = love.graphics.newImage('images/magenta_tower.png')
 tower_images[YELLOW] = love.graphics.newImage('images/yellow_tower.png')
 tower_images[WHITE] = love.graphics.newImage('images/white_tower.png')
+
 function tower_images.getImage(color)
 	if color[1] == 1 and color[2] == 0 and color[3] == 0 then
 		return tower_images[RED]

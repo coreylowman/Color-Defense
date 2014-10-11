@@ -1,5 +1,6 @@
 health_bar = {}
 
+--health bar constructor
 function health_bar:new()
 	local hp = {}
 	setmetatable(hp,{__index = self})
@@ -11,7 +12,7 @@ function health_bar:new()
 	return hp
 end
 
-
+--draws the health bar based on the percentage of life pased in (called in level.lua)
 function health_bar:draw(percentage)
 	self.lost_amount = self.lost_amount + (self.percentage - percentage)*self.max_width/100
 	love.graphics.setColor(255,48,48,255)
@@ -28,6 +29,7 @@ function health_bar:draw(percentage)
 	self.percentage = percentage
 end
 
+-- controls the amount lost (if you lose health, a ghost of the health slowly drains down (lost amount))
 function health_bar:update(dt)
 	if self.lost_amount > 0 then
 		self.lost_amount = self.lost_amount - 25*dt

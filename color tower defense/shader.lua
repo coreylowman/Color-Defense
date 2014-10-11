@@ -1,4 +1,5 @@
 
+--called when the lights are turned off... each tower casts a color in its radius
 function getLightShader()
 	local pixelcode = [[
 		extern vec2 light_pos[128];
@@ -32,6 +33,7 @@ function getLightShader()
 	return love.graphics.newShader(pixelcode,vertexcode)
 end
 
+--selection shader is used when a tower is selected. it draws a circle with gradient filling
 function getSelectionShader()
 	local pixelcode = [[
 		extern vec2 select_pos;
@@ -59,6 +61,7 @@ function getSelectionShader()
 	return love.graphics.newShader(pixelcode,vertexcode)
 end
 
+--crystal shader is called when a spell is used, it draw 8 beams of rotating colored light from the crystal
 function getCrystalShader()
 	local pixelcode = [[
 		extern number crystal_time;

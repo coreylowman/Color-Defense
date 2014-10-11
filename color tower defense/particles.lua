@@ -1,5 +1,11 @@
 PARTICLE = {}
 
+--particle constructor
+-- (x,y) is the position
+-- color is the color to draw
+-- life is the duration
+-- (dx,dy) is velocity
+-- (ddx,ddy) is acceleration
 function PARTICLE:new(x,y,color,life,dx,dy,ddx,ddy)
 	local particle = {}
 	setmetatable(particle,{__index = self})
